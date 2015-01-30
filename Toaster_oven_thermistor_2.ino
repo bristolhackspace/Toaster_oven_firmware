@@ -104,8 +104,8 @@ const short temptable_1[][2] PROGMEM = {
 // The temperature/time profile as {secs, temp}
 // This profile is linearly interpolated to get the required temperature at any time.
 // PLEN is the number of entries
-#define PLEN 8
-long profile[PLEN][2] = { {0, 15}, {5, 50}, {90, 120}, {120, 150}, {240, 180}, {280, 225}, {320, 183}, {350, 0} };
+#define PLEN 9
+long profile[PLEN][2] = { {0, 15}, {5, 50}, {90, 120}, {120, 150}, {240, 180}, {280, 225}, {285, 225}, {320, 183}, {350, 0} };
 
 // Linearly interpolate the profile for the current time in secs, t
 
