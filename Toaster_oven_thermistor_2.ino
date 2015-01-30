@@ -11,6 +11,10 @@
 */
 
 #include <avr/pgmspace.h>
+
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
+
 const int heatPin =  13;     // the number of the LED pin.  This also controls the heater
 int heatState = LOW;         // heatState used to set the LED and heater
 long previousMillis = 0;     // will store last time LED/heater was updated
@@ -19,6 +23,12 @@ const int tempPin = 0;       // Analogue pin for temperature reading
 long time = 0;               // Time since start in seconds
 bool done=false;             // Flag to indicate that the process has finished
 
+// pin 8 - Serial clock out (SCLK)
+// pin 7 - Serial data out (DIN)
+// pin 6 - Data/Command select (D/C)
+// pin 5 - LCD chip select (CS)
+// pin 4 - LCD reset (RST)
+Adafruit_PCD8544 display = Adafruit_PCD8544(4, 5, 6, 7, 8);
 
 #define PGM_RD_W(x)  (short)pgm_read_word(&x)
 
@@ -167,11 +177,23 @@ return (int)analog2temp(analogRead(tempPin));
 // Get the show on the road
 
 void setup() {
-
+  display.begin();
+  display.setContrast(50);
+  display.display(); // show splashscreen
+  pinMode(2, OUTPUT);
+  digitalWrite(2,HIGH); //turn on backlight
+  delay(1000);
+  display.clearDisplay();   // clears the screen and buffer
+  
   pinMode(heatPin, OUTPUT); 
   pinMode(tempPin, INPUT);  
   Serial.begin(9600);
-  Serial.println("\n\n\nTime, target, raw, temp"); 
+  Serial.println("\n\n\nTime, target, raw, temp");
+  //-----LCD Display-------------
+  display.setTextColor(BLACK);
+  display.setTextSize(1);
+  display.println("Time Target Raw Temp");
+  display.display();
   done = false;
 }
 
@@ -216,14 +238,28 @@ void loop()
     {
       Serial.print((char)0x07);  // Bell to wake the user up...
       Serial.print((char)0x07);
-      Serial.print("FINISHED ");
+      display.clearDisplay();
+      display.print("FINISHED");
+      display.display();
+      Serial.print("FINISHED");
     }
+    //--------LCD output----------
+    display.clearDisplay(); 
+    display.println("Time");
+    display.println(time);
+    display.println("Target Temp"); 
+    display.println(tg);
+    display.println("Actual Temp");
+    display.print(t);
+    display.display(); 
+    //-------Serial output---------
     Serial.print(time);
-    Serial.print(", ");
+    Serial.print(",");
     Serial.print(tg);
-    Serial.print(", ");
+    Serial.print(",");
     Serial.print(rawreading());
-    Serial.print(", ");
-    Serial.println(t);
+    Serial.print(",");
+    Serial.println(t);    
+    
   }
 }
